@@ -28,21 +28,33 @@ class Movie {
   });
 
   factory Movie.fromJson(Map<String, dynamic> json) {
+    final rawPoster = json['poster_url'] ?? json['poster'] ?? json['cover'] ?? json['backdrop_url'] ?? '';
+    final poster = (rawPoster != null && rawPoster.toString().isNotEmpty)
+        ? rawPoster.toString()
+        : 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=800&auto=format&fit=crop';
+
+    double parsedRating = 8.5;
+    if (json['rating'] != null) {
+      parsedRating = double.tryParse(json['rating'].toString()) ?? 8.5;
+    }
+
     return Movie(
-      id: json['id']?.toString() ?? json['slug']?.toString() ?? '',
-      title: json['title'] ?? json['name'] ?? 'Untitled Movie',
-      posterUrl: json['poster_url'] ?? json['poster'] ?? json['cover'] ?? '',
-      backdropUrl: json['backdrop_url'] ?? json['banner'] ?? json['poster_url'] ?? '',
-      rating: (json['rating'] ?? json['rate'] ?? 8.5).toDouble(),
+      id: json['subject_id']?.toString() ?? json['id']?.toString() ?? json['slug']?.toString() ?? 'movie-1',
+      title: json['name'] ?? json['title'] ?? 'Untitled Movie',
+      posterUrl: poster,
+      backdropUrl: (json['backdrop_url'] != null && json['backdrop_url'].toString().isNotEmpty)
+          ? json['backdrop_url'].toString()
+          : poster,
+      rating: parsedRating,
       releaseYear: json['release_year']?.toString() ?? json['year']?.toString() ?? '2024',
       duration: json['duration'] ?? '2h 15m',
       genres: json['genres'] != null
           ? List<String>.from(json['genres'])
           : ['Action', 'Thriller'],
-      description: json['description'] ?? json['overview'] ?? 'No description available.',
+      description: json['description'] ?? json['overview'] ?? 'Saksikan serial dan film eksklusif pilihan hanya di NetCinema.',
       category: json['category'] ?? 'Trending Now',
       matchScore: json['match_score'] ?? 96,
-      isTop10: json['is_top_10'] ?? false,
+      isTop10: json['is_top_10'] ?? (json['badge'] != null && json['badge'].toString().isNotEmpty),
     );
   }
 
@@ -63,7 +75,7 @@ class Movie {
     };
   }
 
-  // Realistic sample movies for initial demo & smooth offline fallback
+  // High-reliability sample dataset for offline fallback
   static List<Movie> get mockMovies => [
         const Movie(
           id: '1',
@@ -120,45 +132,6 @@ class Movie {
           category: 'Top Rated',
           matchScore: 97,
           isTop10: true,
-        ),
-        const Movie(
-          id: '5',
-          title: 'Inception',
-          posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=800&auto=format&fit=crop',
-          backdropUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
-          rating: 8.8,
-          releaseYear: '2010',
-          duration: '2h 28m',
-          genres: ['Action', 'Sci-Fi', 'Thriller'],
-          description: 'Seorang pencuri yang mencuri rahasia korporat melalui penggunaan teknologi berbagi mimpi diberi tugas kebalikannya: menanamkan ide ke dalam pikiran seorang CEO.',
-          category: 'Top Rated',
-          matchScore: 96,
-        ),
-        const Movie(
-          id: '6',
-          title: 'Dune: Part Two',
-          posterUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop',
-          backdropUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop',
-          rating: 8.9,
-          releaseYear: '2024',
-          duration: '2h 46m',
-          genres: ['Action', 'Adventure', 'Sci-Fi'],
-          description: 'Paul Atreides bersatu kembali dengan Chani dan Fremen sambil membalas dendam terhadap para konspirator yang menghancurkan keluarganya.',
-          category: 'Action Movies',
-          matchScore: 98,
-        ),
-        const Movie(
-          id: '7',
-          title: 'Avengers: Endgame',
-          posterUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=800&auto=format&fit=crop',
-          backdropUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1200&auto=format&fit=crop',
-          rating: 8.4,
-          releaseYear: '2019',
-          duration: '3h 01m',
-          genres: ['Action', 'Sci-Fi', 'Adventure'],
-          description: 'Setelah peristiwa kehancuran oleh Thanos, Avengers tersisa berkumpul kembali untuk membalikkan tindakan Thanos.',
-          category: 'Action Movies',
-          matchScore: 93,
         ),
       ];
 }

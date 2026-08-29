@@ -11,6 +11,10 @@ class MovieCard extends StatelessWidget {
   final double height;
   final bool showRating;
 
+  static const Map<String, String> _imageHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  };
+
   const MovieCard({
     super.key,
     required this.movie,
@@ -56,11 +60,12 @@ class MovieCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Hero animated cached network poster image
+              // Hero animated cached network poster image with headers
               Hero(
                 tag: 'movie-poster-${movie.id}',
                 child: CachedNetworkImage(
                   imageUrl: movie.posterUrl,
+                  httpHeaders: _imageHeaders,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
                     color: AppColors.surface,

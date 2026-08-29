@@ -60,6 +60,9 @@ class MovieDetailScreen extends ConsumerWidget {
                     tag: 'movie-banner-${movie.id}',
                     child: CachedNetworkImage(
                       imageUrl: movie.backdropUrl.isNotEmpty ? movie.backdropUrl : movie.posterUrl,
+                      httpHeaders: const {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                      },
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -89,6 +92,9 @@ class MovieDetailScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                             child: CachedNetworkImage(
                               imageUrl: movie.posterUrl,
+                              httpHeaders: const {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                              },
                               width: 100,
                               height: 150,
                               fit: BoxFit.cover,

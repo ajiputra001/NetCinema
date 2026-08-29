@@ -8,6 +8,10 @@ import '../screens/movie_detail_screen.dart';
 class HeroBanner extends StatelessWidget {
   final Movie movie;
 
+  static const Map<String, String> _imageHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+  };
+
   const HeroBanner({super.key, required this.movie});
 
   @override
@@ -32,6 +36,7 @@ class HeroBanner extends StatelessWidget {
               width: double.infinity,
               child: CachedNetworkImage(
                 imageUrl: movie.backdropUrl.isNotEmpty ? movie.backdropUrl : movie.posterUrl,
+                httpHeaders: _imageHeaders,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(color: AppColors.surface),
                 errorWidget: (context, url, error) => Container(
@@ -86,7 +91,7 @@ class HeroBanner extends StatelessWidget {
                   movie.title.toUpperCase(),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 28,
+                    fontSize: 26,
                     fontWeight: FontWeight.w900,
                     color: Colors.white,
                     letterSpacing: 1.2,
