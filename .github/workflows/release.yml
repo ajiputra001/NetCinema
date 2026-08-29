@@ -1,0 +1,55 @@
+name: Build & Auto Release NetCinema APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    name: Build Android Release APK & Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21 JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.24.0'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Create Release & Upload APK
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+        with:
+          tag_name: ${{ github.ref_name == 'main' && 'v1.0.0' || github.ref_name }}
+          name: NetCinema Native Mobile App Release
+          body: |
+            ## NetCinema Native Mobile App Release 🎬🍿
+            
+            Aplikasi mobile native NetCinema (Android) dengan performa loading instan, UI/UX Dark Theme Netflix, dan pemutar video native.
+            
+            ### 📥 Cara Instalasi:
+            1. Unduh berkas **`app-release.apk`** di bawah ini.
+            2. Pasang pada perangkat Android Anda.
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
