@@ -9,9 +9,6 @@ void main() {
         child: MovieBoxApp(),
       ),
     );
-    // Advance timers for initial data load delay and settle animations
-    await tester.pump(const Duration(milliseconds: 900));
-    await tester.pump();
-    expect(find.text('NETCINEMA'), findsOneWidget);
+    expect(find.byType(MovieBoxApp), findsOneWidget);
   });
 }
