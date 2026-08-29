@@ -9,11 +9,15 @@ import '../../data/repositories/movie_repository.dart';
 class VideoPlayerScreen extends StatefulWidget {
   final Movie movie;
   final String? initialVideoUrl;
+  final int season;
+  final int episode;
 
   const VideoPlayerScreen({
     super.key,
     required this.movie,
     this.initialVideoUrl,
+    this.season = 1,
+    this.episode = 1,
   });
 
   @override
@@ -25,7 +29,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   bool _showControls = true;
   bool _isInitialized = false;
   bool _hasError = false;
-  String _statusMessage = 'Menghubungkan ke server stream...';
+  String _statusMessage = 'Menghubungkan ke server stream (480P MP4)...';
 
   static const Map<String, String> _headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -34,7 +38,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    // Enable landscape fullscreen mode for cinema viewing
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -49,7 +52,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
     if (streamUrl == null || streamUrl.isEmpty) {
       final repository = MovieRepository();
-      streamUrl = await repository.fetchVideoStreamUrl(widget.movie.id, widget.movie.title);
+      streamUrl = await repository.fetchVideoStreamUrl(
+        widget.movie.id,
+        widget.movie.slug,
+        se: widget.season,
+        ep: widget.episode,
+      );
     }
 
     if (streamUrl == null || streamUrl.isEmpty) {
@@ -84,7 +92,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       if (mounted) {
         setState(() {
           _hasError = true;
-          _statusMessage = 'Format video tidak didukung oleh perangkat.';
+          _statusMessage = 'Gagal memutar format video. Mencoba ulang...';
         });
       }
     }
@@ -92,7 +100,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void dispose() {
-    // Restore normal orientation
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
@@ -110,6 +117,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final titleText = widget.season > 0 && widget.episode > 0
+        ? '${widget.movie.title} (S${widget.season}:E${widget.episode})'
+        : widget.movie.title;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -121,7 +132,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Native Video Player Surface
+            // Native Video Surface
             if (_isInitialized && _controller != null)
               Center(
                 child: AspectRatio(
@@ -170,7 +181,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 ),
               ),
 
-            // Controls Overlay Screen
+            // Controls Overlay
             if (_showControls)
               Container(
                 color: Colors.black.withOpacity(0.55),
@@ -178,7 +189,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Top Header Bar
+                      // Top Bar
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         child: Row(
@@ -190,7 +201,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                widget.movie.title,
+                                titleText,
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -206,7 +217,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: const Text(
-                                'HD 1080P',
+                                '480P MP4',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
@@ -218,7 +229,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ),
                       ),
 
-                      // Center Playback Controls (10s Backward, Play/Pause, 10s Forward)
+                      // Center Playback Controls
                       if (_isInitialized && _controller != null)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -266,7 +277,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           ],
                         ),
 
-                      // Bottom Progress Slider & Time Labels
+                      // Bottom Progress Slider
                       if (_isInitialized && _controller != null)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

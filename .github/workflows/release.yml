@@ -39,21 +39,20 @@ jobs:
         run: flutter pub get
 
       - name: Build Release APK
-        run: flutter build apk --release --build-name=1.0.1 --build-number=2
+        run: flutter build apk --release --build-name=1.0.3 --build-number=4
 
       - name: Create Release & Upload APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.1
-          name: NetCinema Native Mobile App v1.0.1
+          tag_name: v1.0.3
+          name: NetCinema Native Mobile App v1.0.3
           body: |
-            ## NetCinema Native Mobile App v1.0.1 🎬🍿
+            ## NetCinema Native Mobile App v1.0.3 🎬🍿
             
-            ### 🚀 Pembaruan Utama Versi 1.0.1:
-            - **Performa 60 FPS Super Mulus**: Lazy Viewport Rendering (`CustomScrollView` + `SliverList`) & optimasi memori RAM gambar >80%.
-            - **Streaming Video Instan**: Pemutar video native terhubung ke backend API stream 1080P/H264.
-            - **In-App Force Update Modal**: Notifikasi pembaruan otomatis langsung dari aplikasi.
-            - **Auto Installer**: Menginstal APK baru tanpa menghapus data aplikasi lama.
+            ### 🚀 Pembaruan Utama Versi 1.0.3:
+            - **Resolusi 480P MP4 Direct Stream**: Pemutaran video diprioritaskan ke format MP4 H264 480P yang didukung secara native oleh semua HP Android tanpa lag/buffering.
+            - **Menu Pilihan Episode & Season**: Menampilkan pilihan Season 1, 2, 3 dan daftar Episode lengkap yang dapat langsung diputar secara fleksibel.
+            - **Auto-Fallback Engine**: Otomatis berpindah parameter stream jika link episode/movie offline.
             
             ### 📥 Cara Instalasi:
             1. Unduh berkas **`app-release.apk`** di bawah ini.

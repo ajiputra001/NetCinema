@@ -51,30 +51,42 @@ class MovieRepository {
     return Movie.mockMovies;
   }
 
-  // Fetch real stream video URL from FastAPI backend
-  Future<String?> fetchVideoStreamUrl(String subjectId, String slug) async {
+  // Fetch real stream video URL with 480p MP4 preference
+  Future<String?> fetchVideoStreamUrl(String subjectId, String slug, {int se = 1, int ep = 1}) async {
     if (subjectId.isEmpty && slug.isEmpty) return null;
     try {
-      final uri = Uri.parse('$baseUrl/api/stream/$subjectId?detail_path=${Uri.encodeComponent(slug)}&obfuscate=false');
-      final response = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 7));
+      final uri = Uri.parse('$baseUrl/api/stream/$subjectId?detail_path=${Uri.encodeComponent(slug)}&se=$se&ep=$ep&obfuscate=false');
+      final response = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         if (data['sources'] != null && data['sources'] is List) {
           final List sources = data['sources'];
 
-          // First preference: MP4 direct stream URL (H264)
+          // 1. Highest priority: Direct 480p MP4 URL (Fastest Android hardware playback)
           for (var src in sources) {
             if (src is Map<String, dynamic>) {
               final String format = (src['format'] ?? '').toString().toUpperCase();
+              final String res = (src['resolution'] ?? src['resolutions'] ?? '').toString();
               final String url = (src['url'] ?? src['url_raw'] ?? '').toString();
-              if (format == 'MP4' && url.startsWith('http')) {
+              if (format == 'MP4' && res.contains('480') && url.startsWith('http') && !url.contains('.mpd')) {
                 return url;
               }
             }
           }
 
-          // Second preference: Any valid direct video URL
+          // 2. Second priority: Any direct MP4 video URL (H264)
+          for (var src in sources) {
+            if (src is Map<String, dynamic>) {
+              final String format = (src['format'] ?? '').toString().toUpperCase();
+              final String url = (src['url'] ?? src['url_raw'] ?? '').toString();
+              if (format == 'MP4' && url.startsWith('http') && !url.contains('.mpd')) {
+                return url;
+              }
+            }
+          }
+
+          // 3. Third priority: Any non-DASH HTTP stream URL
           for (var src in sources) {
             if (src is Map<String, dynamic>) {
               final String url = (src['url'] ?? src['url_raw'] ?? '').toString();
@@ -85,9 +97,13 @@ class MovieRepository {
           }
         }
       }
+
+      // Fallback for standalone movies requiring se=0, ep=0
+      if (se != 0 || ep != 0) {
+        return fetchVideoStreamUrl(subjectId, slug, se: 0, ep: 0);
+      }
     } catch (_) {}
 
-    // Fallback sample MP4 video for smooth demonstration
     return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4';
   }
 
@@ -96,13 +112,14 @@ class MovieRepository {
     try {
       final response = await http
           .get(Uri.parse('$baseUrl/search?q=${Uri.encodeComponent(query)}'), headers: _headers)
-          .timeout(const Duration(seconds: 6));
+          .timeout(const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        if (data['data'] != null && data['data'] is List) {
-          final List list = data['data'];
-          return list.map((item) => Movie.fromJson(item)).toList();
+        final List? rawList = data['items'] ?? data['data'];
+
+        if (rawList != null && rawList.isNotEmpty) {
+          return rawList.map((item) => Movie.fromJson(item)).toList();
         }
       }
     } catch (_) {}

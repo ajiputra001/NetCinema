@@ -5,7 +5,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/movie_model.dart';
 import '../providers/my_list_provider.dart';
-import '../widgets/movie_card.dart';
 import '../widgets/season_episode_picker.dart';
 import 'video_player_screen.dart';
 
@@ -14,11 +13,25 @@ class MovieDetailScreen extends ConsumerWidget {
 
   const MovieDetailScreen({super.key, required this.movie});
 
+  Widget _buildIconButton(IconData icon, String label, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isBookmarked = ref.watch(myListProvider.notifier).isBookmarked(movie.id);
-    final isSeries = movie.duration.toLowerCase().contains('season') ||
-        movie.duration.toLowerCase().contains('episode');
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -40,18 +53,6 @@ class MovieDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircleAvatar(
-                  backgroundColor: Colors.black.withOpacity(0.6),
-                  child: IconButton(
-                    icon: const Icon(LucideIcons.share2, color: Colors.white, size: 18),
-                    onPressed: () {},
-                  ),
-                ),
-              ),
-            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -63,26 +64,32 @@ class MovieDetailScreen extends ConsumerWidget {
                       httpHeaders: const {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                       },
+                      memCacheWidth: 600,
                       fit: BoxFit.cover,
                     ),
                   ),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
+
+                  // Black gradient overlay
+                  Container(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Color(0x80141414),
+                          Colors.black45,
                           AppColors.background,
                         ],
-                        stops: [0.4, 0.85, 1.0],
+                        stops: [0.0, 0.6, 1.0],
                       ),
                     ),
                   ),
+
+                  // Poster & Title Info Floating on Banner
                   Positioned(
-                    bottom: 20,
+                    bottom: 16,
                     left: 16,
+                    right: 16,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -95,6 +102,7 @@ class MovieDetailScreen extends ConsumerWidget {
                               httpHeaders: const {
                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                               },
+                              memCacheWidth: 240,
                               width: 100,
                               height: 150,
                               fit: BoxFit.cover,
@@ -105,7 +113,6 @@ class MovieDetailScreen extends ConsumerWidget {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 movie.title,
@@ -114,6 +121,8 @@ class MovieDetailScreen extends ConsumerWidget {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 6),
                               Row(
@@ -128,10 +137,10 @@ class MovieDetailScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 10),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                     decoration: BoxDecoration(
                                       color: AppColors.cardDark,
-                                      borderRadius: BorderRadius.circular(3),
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       movie.releaseYear,
@@ -163,7 +172,7 @@ class MovieDetailScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Primary Play Button -> Native Video Player
+                  // Primary Play Button (480P MP4 Direct Stream)
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
@@ -183,10 +192,10 @@ class MovieDetailScreen extends ConsumerWidget {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.play_arrow_rounded, size: 28, color: Colors.black),
-                        SizedBox(width: 6),
+                        Icon(Icons.play_arrow_rounded, size: 28),
+                        SizedBox(width: 8),
                         Text(
-                          'Play Movie',
+                          'Play (480P MP4)',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -196,7 +205,7 @@ class MovieDetailScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
                   // Download Button
                   ElevatedButton(
@@ -223,7 +232,7 @@ class MovieDetailScreen extends ConsumerWidget {
                         Icon(LucideIcons.download, size: 20, color: Colors.white),
                         SizedBox(width: 8),
                         Text(
-                          'Download',
+                          'Download 480P',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -293,66 +302,23 @@ class MovieDetailScreen extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: 24),
+                  const Divider(color: AppColors.surface, height: 32),
 
-                  // Seasons & Episodes if TV Series, otherwise More Like This
-                  if (isSeries) ...[
-                    const Divider(color: AppColors.surface, height: 32),
-                    SeasonEpisodePicker(movie: movie),
-                  ],
-
-                  const SizedBox(height: 32),
-
+                  // Episodes & Season Picker Section
                   const Text(
-                    'More Like This',
+                    'Episodes & Seasons',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-
                   const SizedBox(height: 12),
+                  SeasonEpisodePicker(movie: movie),
 
-                  // Grid of related movies
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 0.65,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                    ),
-                    itemCount: Movie.mockMovies.length,
-                    itemBuilder: (context, index) {
-                      return MovieCard(
-                        movie: Movie.mockMovies[index],
-                        showRating: false,
-                      );
-                    },
-                  ),
+                  const SizedBox(height: 32),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIconButton(IconData icon, String label, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: color == AppColors.primary ? AppColors.primary : AppColors.textSecondary,
-              fontSize: 12,
-              fontWeight: color == AppColors.primary ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ],

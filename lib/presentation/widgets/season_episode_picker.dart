@@ -33,146 +33,195 @@ class SeasonEpisodePicker extends StatefulWidget {
 class _SeasonEpisodePickerState extends State<SeasonEpisodePicker> {
   int _selectedSeason = 1;
 
-  final List<Episode> _sampleEpisodes = const [
+  final List<Episode> _episodes = const [
     Episode(
       episodeNumber: 1,
-      title: 'Chapter One: The Vanishing',
+      title: 'Episode 1: Permulaan',
       duration: '48m',
-      overview: 'Dalam perjalanan pulang dari rumah teman, Will melihat sesuatu yang menakutkan. Di dekat laboratorium rahasia, rahasia kelam tersembunyi.',
+      overview: 'Episode pertama yang membuka awal kisah petualangan, konflik awal, dan perkenalan karakter utama.',
       thumbnailUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=600&auto=format&fit=crop',
     ),
     Episode(
       episodeNumber: 2,
-      title: 'Chapter Two: The Weirdo on Maple Street',
-      duration: '55m',
-      overview: 'Lucas, Dustin, dan Mike mencoba berbicara dengan gadis yang mereka temukan di hutan. Hopper menanyai pencari keselamatan.',
+      title: 'Episode 2: Rahasia Terkuak',
+      duration: '52m',
+      overview: 'Konflik semakin memanas ketika rahasia penting terungkap dan tantangan baru harus dihadapi.',
       thumbnailUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
     ),
     Episode(
       episodeNumber: 3,
-      title: 'Chapter Three: Holly, Jolly',
-      duration: '51m',
-      overview: 'Joyce yakin Will mencoba berkomunikasi dengannya melalui lampu natal. Nancy mencari temannya yang hilang.',
+      title: 'Episode 3: Keputusan Berat',
+      duration: '50m',
+      overview: 'Para karakter diuji oleh pilihan sulit yang mempertaruhkan persahabatan dan tujuan mereka.',
       thumbnailUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
     ),
+    Episode(
+      episodeNumber: 4,
+      title: 'Episode 4: Titik Balik',
+      duration: '55m',
+      overview: 'Aksi puncaknya dimulai dengan strategi baru dan pertempuran yang tak dapat dihindari.',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop',
+    ),
   ];
+
+  void _playEpisode(Episode ep) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VideoPlayerScreen(
+          movie: widget.movie,
+          season: _selectedSeason,
+          episode: ep.episodeNumber,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Season Dropdown Header
+        // Season Dropdown Selector Header
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            DropdownButton<int>(
-              value: _selectedSeason,
-              dropdownColor: AppColors.surface,
-              underline: const SizedBox.shrink(),
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-              items: const [
-                DropdownMenuItem(value: 1, child: Text('Season 1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                DropdownMenuItem(value: 2, child: Text('Season 2', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                DropdownMenuItem(value: 3, child: Text('Season 3', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedSeason = val);
-              },
+            DropdownButtonHideUnderline(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.white24, width: 0.8),
+                ),
+                child: DropdownButton<int>(
+                  value: _selectedSeason,
+                  dropdownColor: AppColors.surface,
+                  icon: const Icon(LucideIcons.chevronDown, color: Colors.white, size: 18),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  items: [1, 2, 3].map((season) {
+                    return DropdownMenuItem<int>(
+                      value: season,
+                      child: Text('Season $season'),
+                    );
+                  }).toList(),
+                  onChanged: (newSeason) {
+                    if (newSeason != null) {
+                      setState(() {
+                        _selectedSeason = newSeason;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
+            Text(
+              '${_episodes.length} Episode',
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
 
-        // Episodes List
+        // Episode List
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: _sampleEpisodes.length,
+          itemCount: _episodes.length,
           separatorBuilder: (context, index) => const SizedBox(height: 16),
           itemBuilder: (context, index) {
-            final ep = _sampleEpisodes[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => VideoPlayerScreen(movie: widget.movie),
-                  ),
-                );
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      // Thumbnail image with play overlay
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: CachedNetworkImage(
-                              imageUrl: ep.thumbnailUrl,
-                              width: 120,
-                              height: 70,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 1.5),
-                            ),
-                            child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 12),
+            final ep = _episodes[index];
 
-                      // Episode details
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            return InkWell(
+              onTap: () => _playEpisode(ep),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.surface.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        // Episode Thumbnail with Play Overlay
+                        Stack(
+                          alignment: Alignment.center,
                           children: [
-                            Text(
-                              '${ep.episodeNumber}. ${ep.title}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: CachedNetworkImage(
+                                imageUrl: widget.movie.posterUrl,
+                                width: 100,
+                                height: 60,
+                                fit: BoxFit.cover,
+                                memCacheWidth: 200,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              ep.duration,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textMuted,
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.65),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 1.5),
                               ),
+                              child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
                             ),
                           ],
                         ),
-                      ),
-                      const Icon(LucideIcons.download, color: Colors.white, size: 20),
-                    ],
-                  ),
+                        const SizedBox(width: 12),
 
-                  const SizedBox(height: 8),
-
-                  Text(
-                    ep.overview,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      height: 1.3,
+                        // Episode Title & Duration
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${ep.episodeNumber}. ${ep.title}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                ep.duration,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(LucideIcons.play, color: AppColors.primary, size: 20),
+                      ],
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      ep.overview,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
