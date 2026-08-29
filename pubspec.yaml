@@ -42,7 +42,7 @@ dependencies:
   google_fonts: ^6.3.0
   lucide_icons: ^0.257.0
   video_player: ^2.9.5
-  package_info_plus: ^9.0.1
+  package_info_plus: ^8.0.2
   open_file_plus: ^3.4.1+1
   path_provider: ^2.1.5
 
