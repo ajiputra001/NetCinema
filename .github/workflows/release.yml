@@ -8,10 +8,15 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     name: Build Android Release APK & Publish Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Code
@@ -38,9 +43,8 @@ jobs:
 
       - name: Create Release & Upload APK
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
         with:
-          tag_name: ${{ github.ref_name == 'main' && 'v1.0.0' || github.ref_name }}
+          tag_name: v1.0.0
           name: NetCinema Native Mobile App Release
           body: |
             ## NetCinema Native Mobile App Release 🎬🍿
