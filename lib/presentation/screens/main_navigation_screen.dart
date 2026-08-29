@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
+import '../../data/services/app_update_service.dart';
+import '../widgets/force_update_dialog.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
 import 'downloads_screen.dart';
@@ -22,6 +24,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     DownloadsScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAppUpdate();
+  }
+
+  Future<void> _checkAppUpdate() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final updateInfo = await AppUpdateService.checkForUpdates();
+      if (updateInfo != null && updateInfo.hasUpdate && mounted) {
+        ForceUpdateDialog.show(context, updateInfo);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
