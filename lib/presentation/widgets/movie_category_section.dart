@@ -20,6 +20,7 @@ class MovieCategorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (movies.isEmpty) return const SizedBox.shrink();
+    final displayList = movies.length > 12 ? movies.sublist(0, 12) : movies;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,10 +52,11 @@ class MovieCategorySection extends StatelessWidget {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            itemCount: movies.length,
+            cacheExtent: 100, // RAM Optimization
+            itemCount: displayList.length,
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             itemBuilder: (context, index) {
-              final movie = movies[index];
+              final movie = displayList[index];
               return MovieCard(
                 movie: movie,
                 width: cardWidth,

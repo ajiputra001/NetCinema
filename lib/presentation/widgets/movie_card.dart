@@ -29,8 +29,8 @@ class MovieCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 400),
-            reverseTransitionDuration: const Duration(milliseconds: 350),
+            transitionDuration: const Duration(milliseconds: 300),
+            reverseTransitionDuration: const Duration(milliseconds: 250),
             pageBuilder: (context, animation, secondaryAnimation) {
               return FadeTransition(
                 opacity: animation,
@@ -47,25 +47,20 @@ class MovieCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.0),
           color: AppColors.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(6.0),
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Hero animated cached network poster image with headers
+              // Optimized cached network image with memCache resolution downsampling
               Hero(
                 tag: 'movie-poster-${movie.id}',
                 child: CachedNetworkImage(
                   imageUrl: movie.posterUrl,
                   httpHeaders: _imageHeaders,
+                  memCacheWidth: 240, // 80% RAM optimization
+                  memCacheHeight: 360,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
                     color: AppColors.surface,

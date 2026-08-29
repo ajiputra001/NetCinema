@@ -55,7 +55,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         },
         child: Stack(
           children: [
-            // Body Content (Loading vs Loaded State)
+            // Body Content with Slivers for High FPS Lazy Scroll Performance
             homeMoviesState.when(
               loading: () => const HomeScreenSkeleton(),
               error: (err, stack) => Center(
@@ -74,52 +74,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               data: (_) {
-                return SingleChildScrollView(
+                final categoryEntries = moviesByCategory.entries.toList();
+
+                return CustomScrollView(
                   controller: _scrollController,
                   physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      // Top Featured Hero Banner
-                      if (heroMovie != null) HeroBanner(movie: heroMovie),
-
-                      const SizedBox(height: 12),
-
-                      // Horizontal Genre Selector Pills
-                      GenreFilterBar(
-                        selectedGenre: _selectedGenre,
-                        onGenreSelected: (genre) {
-                          setState(() {
-                            _selectedGenre = genre;
-                          });
-                        },
+                  cacheExtent: 300,
+                  slivers: [
+                    // Hero Banner Header
+                    if (heroMovie != null)
+                      SliverToBoxAdapter(
+                        child: HeroBanner(movie: heroMovie),
                       ),
 
-                      const SizedBox(height: 16),
+                    // Genre Selector Bar
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        child: GenreFilterBar(
+                          selectedGenre: _selectedGenre,
+                          onGenreSelected: (genre) {
+                            setState(() {
+                              _selectedGenre = genre;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
 
-                      // Category Horizontal List Views
-                      ...moviesByCategory.entries.map((entry) {
-                        final filteredList = _selectedGenre == 'All'
-                            ? entry.value
-                            : entry.value
-                                .where((m) => m.genres.contains(_selectedGenre))
-                                .toList();
+                    // Lazy Sliver List for Movie Categories
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final entry = categoryEntries[index];
+                          final filteredList = _selectedGenre == 'All'
+                              ? entry.value
+                              : entry.value
+                                  .where((m) => m.genres.contains(_selectedGenre))
+                                  .toList();
 
-                        if (filteredList.isEmpty && _selectedGenre != 'All') {
-                          return const SizedBox.shrink();
-                        }
+                          if (filteredList.isEmpty && _selectedGenre != 'All') {
+                            return const SizedBox.shrink();
+                          }
 
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 20.0),
-                          child: MovieCategorySection(
-                            title: entry.key,
-                            movies: filteredList.isEmpty ? entry.value : filteredList,
-                          ),
-                        );
-                      }),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 20.0),
+                            child: MovieCategorySection(
+                              title: entry.key,
+                              movies: filteredList.isEmpty ? entry.value : filteredList,
+                            ),
+                          );
+                        },
+                        childCount: categoryEntries.length,
+                      ),
+                    ),
 
-                      const SizedBox(height: 40),
-                    ],
-                  ),
+                    const SliverPadding(padding: EdgeInsets.only(bottom: 40)),
+                  ],
                 );
               },
             ),
