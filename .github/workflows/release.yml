@@ -39,17 +39,21 @@ jobs:
         run: flutter pub get
 
       - name: Build Release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --build-name=1.0.1 --build-number=2
 
       - name: Create Release & Upload APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          name: NetCinema Native Mobile App Release
+          tag_name: v1.0.1
+          name: NetCinema Native Mobile App v1.0.1
           body: |
-            ## NetCinema Native Mobile App Release 🎬🍿
+            ## NetCinema Native Mobile App v1.0.1 🎬🍿
             
-            Aplikasi mobile native NetCinema (Android) dengan performa loading instan, UI/UX Dark Theme Netflix, dan pemutar video native.
+            ### 🚀 Pembaruan Utama Versi 1.0.1:
+            - **Performa 60 FPS Super Mulus**: Lazy Viewport Rendering (`CustomScrollView` + `SliverList`) & optimasi memori RAM gambar >80%.
+            - **Streaming Video Instan**: Pemutar video native terhubung ke backend API stream 1080P/H264.
+            - **In-App Force Update Modal**: Notifikasi pembaruan otomatis langsung dari aplikasi.
+            - **Auto Installer**: Menginstal APK baru tanpa menghapus data aplikasi lama.
             
             ### 📥 Cara Instalasi:
             1. Unduh berkas **`app-release.apk`** di bawah ini.
